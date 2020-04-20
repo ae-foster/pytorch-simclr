@@ -30,7 +30,7 @@ The following augmentations are used on the training set
  - Colour distortion. We use the code provided in the paper (Appendix A)
  - Gaussian blur is not yet included
  
-## Encoder
+### Encoder
 We use a ResNet50 as our base architecture. We use the ResNet50 implementation included in `torchvision` with the
 following changes:
  - Stem adapted to the dataset, for details see `models/resnet.py`. We adapt the stem for CIFAR in the same way as
@@ -39,23 +39,23 @@ following changes:
  - We do not make special adjustments to sync the batch norm means and variances across GPU nodes.
  - Remove the final fully connected layer, giving a representation of dimension 2048.
  
-## Projection head
+### Projection head
 The projection head consists of the following:
  - MLP projection with one hidden layer with dimensions 2048 -> 2048 -> 128
  - Following the tensorflow code, we also include batch norm in the projection head
  
-## Loss
+### Loss
 We use the NT-Xent loss of the original paper. Specifically, we calculate the `CosineSimilarity` (using PyTorch's
 implementation) between each of the `2N` projected representations `z`. We rescale these similarities by temperature.
 We set the diagonal similarities to `-inf` and treat the one remaining positive example as the correct category in a
 `2N`-way classification task. The scores are fed directly into `CrossEntropyLoss`.
 
-## Optimizer
+### Optimizer
 We use the LARS optimizer with `trust_coef=1e-3` to match the tensorflow code. We set the weight decay to `1e-6`.
 We do not include a linear ramp, and cosine annealing can be enabled by passing `--cosine-anneal`. In practice, we
 found that the performance without any scheduling was sufficient on CIFAR.
 
-## Evaluation
+### Evaluation
 On CIFAR-10, we fitted the downstream classifier using L-BFGS with no augmentation on the training set. This is the
 approach used in the original paper for transfer learning (and is substantially faster for small datasets).
 For ImageNet, we use SGD with the same random resized crop and random flip as for the original training, but no
