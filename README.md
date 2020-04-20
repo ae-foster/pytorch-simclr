@@ -72,10 +72,10 @@ The dataset file locations should be specified in a JSON file of the following f
 ```
 dataset-paths.json
 {
-    'cifar10': '/data/cifar10/',
-    'cifar100': '/data/cifar100/',
-    'stl10': '/data/stl10/',
-    'imagenet': '/data/imagenet/2012/'
+    "cifar10": "/data/cifar10/",
+    "cifar100": "/data/cifar100/",
+    "stl10": "/data/stl10/",
+    "imagenet": "/data/imagenet/2012/"
 }
 ```
 
