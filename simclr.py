@@ -14,6 +14,7 @@ from configs import get_datasets
 from critic import LinearCritic
 from evaluate import save_checkpoint, encode_train_set, train_clf, test
 from models import *
+from scheduler import CosineAnnealingWithLinearRampLR
 
 parser = argparse.ArgumentParser(description='PyTorch Contrastive Learning.')
 parser.add_argument('--base-lr', default=0.25, type=float, help='base learning rate, rescaled by batch_size/256')
@@ -94,7 +95,7 @@ criterion = nn.CrossEntropyLoss()
 base_optimizer = optim.SGD(list(net.parameters()) + list(critic.parameters()), lr=args.lr, weight_decay=1e-6,
                            momentum=args.momentum)
 if args.cosine_anneal:
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(base_optimizer, args.num_epochs)
+    scheduler = CosineAnnealingWithLinearRampLR(base_optimizer, args.num_epochs)
 encoder_optimizer = LARS(base_optimizer, trust_coef=1e-3)
 
 

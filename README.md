@@ -52,8 +52,8 @@ We set the diagonal similarities to `-inf` and treat the one remaining positive 
 
 ### Optimizer
 We use the LARS optimizer with `trust_coef=1e-3` to match the tensorflow code. We set the weight decay to `1e-6`.
-We do not include a linear ramp, and cosine annealing can be enabled by passing `--cosine-anneal`. In practice, we
-found that the performance without any scheduling was sufficient on CIFAR.
+The 10 epoch linear ramp and cosine annealing of the original paper are implemented and can be activated using
+ `--cosine-anneal`, otherwise a constant learning rate is used.
 
 ### Evaluation
 On CIFAR-10, we fitted the downstream classifier using L-BFGS with no augmentation on the training set. This is the
@@ -82,7 +82,7 @@ dataset-paths.json
 ### Running with CIFAR-10
 Use the following command to train an encoder from scratch on CIFAR-10
 ```
-$ python3 simclr.py --num-epochs 1000 --filename output.pth
+$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth
 ```
 To evaluate the trained encoder using L-BFGS across a range of regularization parameters
 ```
@@ -92,7 +92,7 @@ $ python3 lbfgs_linear_clf.py --load-from output.pth
 ### Running with ImageNet
 Use the following command to train an encoder from scratch on ILSVRC2012
 ```
-$ python3 simclr.py --num-epochs 1000 --filename output.pth --test-freq 0 --num-workers 8 --dataset imagenet 
+$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth --test-freq 0 --num-workers 8 --dataset imagenet 
 ```
 To evaluate the trained encoder, use
 ```
@@ -103,8 +103,9 @@ $ python3 gradient_linear_clf.py --load-from output.pth --nesterov --num-workers
 ## Outstanding differences with the original paper
  - We do not synchronize the batch norm between multiple GPUs. To use PyTorch's `SyncBatchNorm`, we would need to
    change from using `DataParallel` to `DistributedDataParallel`.
-  - We not use Gaussian blur for any datasets, including ILSVRC2012.
-  - We do not use the linear ramp for the learning rate schedule.
+ - We not use Gaussian blur for any datasets, including ILSVRC2012.
+ - We are not aware of any other discrepancies with the original work, but any correction is more than welcome and 
+   should be suggested by opening an Issue in this repo.
 
 
 ## Reproduction results
@@ -112,7 +113,7 @@ $ python3 gradient_linear_clf.py --load-from output.pth --nesterov --num-workers
 Method | Test accuracy 
 --- | ---
 SimCLR quoted | 94.0%
-SimCLR reproduced (this repo) | 93.1%
+SimCLR reproduced (this repo) | 92.7%
 
 
 ## Acknowledgements
