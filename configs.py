@@ -8,7 +8,8 @@ from dataset import *
 from models import *
 
 
-def get_datasets(dataset, augment_clf_train=False, add_indices_to_data=False, num_positive=None):
+def get_datasets(dataset, augment_clf_train=False, add_indices_to_data=False, num_positive=None,
+                 test_as_train=False):
 
     CACHED_MEAN_STD = {
         'cifar10': ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
@@ -47,28 +48,32 @@ def get_datasets(dataset, augment_clf_train=False, add_indices_to_data=False, nu
         transforms.Normalize(*CACHED_MEAN_STD[dataset]),
     ])
 
-    if dataset == 'imagenet':
-        transform_test = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(*CACHED_MEAN_STD[dataset]),
-        ])
+    if test_as_train:
+        transform_test = transform_train
+        transform_clftrain = transform_train
     else:
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(*CACHED_MEAN_STD[dataset]),
-        ])
+        if dataset == 'imagenet':
+            transform_test = transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*CACHED_MEAN_STD[dataset]),
+            ])
+        else:
+            transform_test = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(*CACHED_MEAN_STD[dataset]),
+            ])
 
-    if augment_clf_train:
-        transform_clftrain = transforms.Compose([
-            transforms.RandomResizedCrop(img_size, interpolation=Image.BICUBIC),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(*CACHED_MEAN_STD[dataset]),
-        ])
-    else:
-        transform_clftrain = transform_test
+        if augment_clf_train:
+            transform_clftrain = transforms.Compose([
+                transforms.RandomResizedCrop(img_size, interpolation=Image.BICUBIC),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(*CACHED_MEAN_STD[dataset]),
+            ])
+        else:
+            transform_clftrain = transform_test
 
     if dataset == 'cifar100':
         if add_indices_to_data:
@@ -102,7 +107,7 @@ def get_datasets(dataset, augment_clf_train=False, add_indices_to_data=False, nu
         if add_indices_to_data:
             dset = add_indices(torchvision.datasets.STL10)
         else:
-            dset = torchvision.datasets.STl10
+            dset = torchvision.datasets.STL10
         if num_positive is None:
             trainset = STL10Biaugment(root=root, split='unlabeled', download=True, transform=transform_train)
         else:

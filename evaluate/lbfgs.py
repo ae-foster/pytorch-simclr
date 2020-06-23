@@ -4,6 +4,34 @@ import torch.optim as optim
 from tqdm import tqdm
 
 
+def encode_feature_averaging(clftrainloader, device, net, target=None, num_passes=10):
+    if target is None:
+        target = device
+
+    net.eval()
+
+    X, y = None, None
+    with torch.no_grad():
+        for i in tqdm(range(num_passes)):
+            store = []
+            for batch_idx, (inputs, targets) in enumerate(clftrainloader):
+                inputs, targets = inputs.to(device), targets.to(device)
+                representation = net(inputs)
+                representation, targets = representation.to(target), targets.to(target)
+                store.append((representation, targets))
+
+            Xi, y = zip(*store)
+            Xi, y = torch.cat(Xi, dim=0), torch.cat(y, dim=0)
+            if X is None:
+                X = Xi
+            else:
+                X += Xi
+
+    X /= num_passes
+
+    return X, y
+
+
 def encode_train_set(clftrainloader, device, net):
     net.eval()
 
