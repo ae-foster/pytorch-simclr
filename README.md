@@ -82,7 +82,7 @@ dataset-paths.json
 ### Running with CIFAR-10
 Use the following command to train an encoder from scratch on CIFAR-10
 ```
-$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth
+$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth --base-lr 1.5
 ```
 To evaluate the trained encoder using L-BFGS across a range of regularization parameters
 ```
@@ -92,17 +92,17 @@ $ python3 lbfgs_linear_clf.py --load-from output.pth
 ### Running with ImageNet
 Use the following command to train an encoder from scratch on ILSVRC2012
 ```
-$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth --test-freq 0 --num-workers 8 --dataset imagenet 
+$ python3 simclr.py --num-epochs 1000 --cosine-anneal --filename output.pth --test-freq 0 --num-workers 32 --dataset imagenet 
 ```
 To evaluate the trained encoder, use
 ```
-$ python3 gradient_linear_clf.py --load-from output.pth --nesterov --num-workers 8
+$ python3 gradient_linear_clf.py --load-from output.pth --nesterov --num-workers 32
 ```
 
 
 ## Outstanding differences with the original paper
- - We do not synchronize the batch norm between multiple GPUs. To use PyTorch's `SyncBatchNorm`, we would need to
-   change from using `DataParallel` to `DistributedDataParallel`.
+ - We do not synchronize the batch norm between multiple GPUs. (To use PyTorch's `SyncBatchNorm`, we would need to
+   change from using `DataParallel` to `DistributedDataParallel`.)
  - We not use Gaussian blur for any datasets, including ILSVRC2012.
  - We are not aware of any other discrepancies with the original work, but any correction is more than welcome and 
    should be suggested by opening an Issue in this repo.
@@ -113,7 +113,7 @@ $ python3 gradient_linear_clf.py --load-from output.pth --nesterov --num-workers
 Method | Test accuracy 
 --- | ---
 SimCLR quoted | 94.0%
-SimCLR reproduced (this repo) | 92.7%
+SimCLR reproduced (this repo) | 93.5%
 
 
 ## Acknowledgements
